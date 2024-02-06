@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  frontend:
+    container_name: frontend
+    build:
+      context: .
+      dockerfile: frontend/Dockerfile
+    volumes:
+      - ${PWD}/frontend:/app/frontend
+    ports:
+      - 3000:3000
+    restart: unless-stopped
+    command: npm run dev
+
+  backend:
+    container_name: backend
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    volumes:
+      - ${PWD}/backend:/app/backend
+    ports:
+      - 8000:8000
+    restart: unless-stopped
+    depends_on:
+      - postgres
+
+  postgres:
+    container_name: postgres
+    image: postgres:latest
+    restart: on-failure
+    env_file:
+      - .dbenv
+    ports:
+      - "5432:5432"
+    volumes:
+      - /var/db_data:/var/lib/postgresql/data
+  
+  pgadmin:
+    container_name: pgadmin4
+    image: dpage/pgadmin4
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: root
+    ports:
+      - "8080:80"
